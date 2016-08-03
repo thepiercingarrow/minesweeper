@@ -84,6 +84,7 @@ int main() {
 
     render(land, curx, cury);
   }
+  return 0; // shouldn't be reached
 }
 
 void render(char land[WIDTH_MAX][HEIGHT_MAX], int curx, int cury) {
