@@ -56,8 +56,8 @@ int main() {
   init_pair(3, COLOR_RED, COLOR_RED);
 
   int curx = 0, cury = 0;
-  render(land, curx, cury);
-    for (;;) {
+  for (;;) {
+    render(land, curx, cury);
     switch (getch()) {
     case KEY_UP:
       if (cury > 0)
@@ -85,8 +85,6 @@ int main() {
       endwin();
       exit(0);
     }
-
-    render(land, curx, cury);
   }
   return 0; // shouldn't be reached
 }
