@@ -3,20 +3,20 @@
 
 #include <ncurses.h>
 
-#define W_MAX 100
-#define H_MAX 100
+#define WIDTH_MAX 100
+#define HEIGHT_MAX 100
 
-void render(char land[W_MAX][H_MAX], int curx, int cury);
-void flood(char land[W_MAX][H_MAX], char map[W_MAX][H_MAX], int x, int y);
-void end_game(char mines[W_MAX][H_MAX]);
+void render(char land[WIDTH_MAX][HEIGHT_MAX], int curx, int cury);
+void flood(char land[WIDTH_MAX][HEIGHT_MAX], char map[WIDTH_MAX][HEIGHT_MAX], int x, int y);
+void end_game(char mines[WIDTH_MAX][HEIGHT_MAX]);
 
-int wid = 10, height = 10, num_mine = 10;
+int width = 10, height = 10, num_mine = 10;
 
 FILE *fdb;
 
 int main() {
   fdb = fopen("debug", "w");
-  char land[W_MAX][H_MAX], map[W_MAX][H_MAX], mines[W_MAX][H_MAX];
+  char land[WIDTH_MAX][HEIGHT_MAX], map[WIDTH_MAX][HEIGHT_MAX], mines[WIDTH_MAX][HEIGHT_MAX];
   memset(land, '#', sizeof land);
   memset(mines, 0, sizeof mines);
   sranddev();
@@ -31,12 +31,12 @@ int main() {
   }
 
   int j;
-  for (i = 0; i < wid; ++i) {
+  for (i = 0; i < width; ++i) {
     for (j = 0; j < height; ++j) {
       int k, l, tot = 0;
       for (k = -1; k <= 1; ++k)
 	for (l = -1; l <= 1; ++l)
-	  tot += (0 <= (i+k) && (i+k) < wid) && (0 <= (j+l) && (j+l) < height) ? mines[i+k][j+l] : 0;
+	  tot += (0 <= (i+k) && (i+k) < width) && (0 <= (j+l) && (j+l) < height) ? mines[i+k][j+l] : 0;
       map[i][j] = tot ? tot + '0' : ' ';
     }
   }
@@ -68,7 +68,7 @@ int main() {
 	--curx;
       break;
     case KEY_RIGHT:
-      if (curx != wid - 1)
+      if (curx != width - 1)
 	++curx;
       break;
     case '\n':
@@ -86,12 +86,12 @@ int main() {
   }
 }
 
-void render(char land[W_MAX][H_MAX], int curx, int cury) {
+void render(char land[WIDTH_MAX][HEIGHT_MAX], int curx, int cury) {
   clear();
 
   int i, j;
   attron(COLOR_PAIR(1));
-  for (i = 0; i < wid; ++i)
+  for (i = 0; i < width; ++i)
     for (j = 0; j < height; ++j)
       mvaddch(j, 2 * i, land[i][j]);
   attroff(COLOR_PAIR(1));
@@ -103,9 +103,9 @@ void render(char land[W_MAX][H_MAX], int curx, int cury) {
   refresh();
 }
 
-void flood(char land[W_MAX][H_MAX], char map[W_MAX][H_MAX], int x, int y) {
+void flood(char land[WIDTH_MAX][HEIGHT_MAX], char map[WIDTH_MAX][HEIGHT_MAX], int x, int y) {
   fprintf(fdb, "%d %d\n", x, y);
-  if (x < 0 || x >= wid || y < 0 || y >= height)
+  if (x < 0 || x >= width || y < 0 || y >= height)
     return;
   if (land[x][y] == map[x][y])
     return;
@@ -118,10 +118,10 @@ void flood(char land[W_MAX][H_MAX], char map[W_MAX][H_MAX], int x, int y) {
   }
 }
 
-void end_game(char mines[W_MAX][H_MAX]) {
+void end_game(char mines[WIDTH_MAX][HEIGHT_MAX]) {
   int i, j;
   attron(COLOR_PAIR(3));
-  for (i = 0; i < wid; ++i)
+  for (i = 0; i < width; ++i)
     for (j = 0; j < height; ++j)
       if (mines[i][j])
 	mvaddch(j, 2 * i, ' ');
