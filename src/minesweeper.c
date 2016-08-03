@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -10,17 +11,17 @@ typedef struct {
   char cells[WIDTH_MAX][HEIGHT_MAX];
 } Landmap;
 
-void render(Landmap land, int curx, int cury);
-void flood(Landmap land, Landmap map, int x, int y);
-void end_game(Landmap mines);
+void render(int curx, int cury);
+void flood(int x, int y);
+void end_game();
 
 int width = 10, height = 10, num_mine = 10;
+Landmap land, map, mines;
 
 FILE *fdb;
 
 int main() {
   fdb = fopen("debug", "w");
-  Landmap land, map, mines;
   memset(land.cells, '#', WIDTH_MAX * HEIGHT_MAX * sizeof(char));
   memset(mines.cells, 0, sizeof(Landmap));
   sranddev();
@@ -46,7 +47,6 @@ int main() {
   }
 
   initscr();
-  keypad(stdscr, TRUE);
   raw();
   noecho();
   start_color();
@@ -57,21 +57,21 @@ int main() {
 
   int curx = 0, cury = 0;
   for (;;) {
-    render(land, curx, cury);
+    render(curx, cury);
     switch (getch()) {
-    case KEY_UP:
+    case 'k':
       if (cury > 0)
 	--cury;
       break;
-    case KEY_DOWN:
+    case 'j':
       if (cury < height - 1)
 	++cury;
       break;
-    case KEY_LEFT:
+    case 'h':
       if (curx > 0)
 	--curx;
       break;
-    case KEY_RIGHT:
+    case 'l':
       if (curx < width - 1)
 	++curx;
       break;
@@ -79,7 +79,7 @@ int main() {
       if (mines.cells[curx][cury])
 	end_game(mines);
       if (land.cells[curx][cury] == '#')
-	flood(land, map, curx, cury);
+	flood(curx, cury);
       break;
     case 'q':
       endwin();
@@ -89,7 +89,7 @@ int main() {
   return 0; // shouldn't be reached
 }
 
-void render(Landmap land, int curx, int cury) {
+void render(int curx, int cury) {
   fprintf(fdb, "render");
   clear();
 
@@ -107,7 +107,7 @@ void render(Landmap land, int curx, int cury) {
   refresh();
 }
 
-void flood(Landmap land, Landmap map, int x, int y) {
+void flood(int x, int y) {
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
   if (land.cells[x][y] == map.cells[x][y])
@@ -115,14 +115,14 @@ void flood(Landmap land, Landmap map, int x, int y) {
   fprintf(fdb, "%d %d\n", x, y);
   land.cells[x][y] = map.cells[x][y];
   if (land.cells[x][y] == ' ') {
-    flood(land, map, x + 1, y);
-    flood(land, map, x, y + 1);
-    flood(land, map, x - 1, y);
-    flood(land, map, x, y - 1);
+    flood(x + 1, y);
+    flood(x, y + 1);
+    flood(x - 1, y);
+    flood(x, y - 1);
   }
 }
 
-void end_game(Landmap mines) {
+void end_game() {
   int i, j;
   attron(COLOR_PAIR(3));
   for (i = 0; i < width; ++i)
