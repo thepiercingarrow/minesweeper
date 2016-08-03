@@ -108,11 +108,11 @@ void render(Landmap land, int curx, int cury) {
 }
 
 void flood(Landmap land, Landmap map, int x, int y) {
-  fprintf(fdb, "%d %d\n", x, y);
   if (x < 0 || x >= width || y < 0 || y >= height)
     return;
   if (land.cells[x][y] == map.cells[x][y])
     return;
+  fprintf(fdb, "%d %d\n", x, y);
   land.cells[x][y] = map.cells[x][y];
   if (land.cells[x][y] == ' ') {
     flood(land, map, x + 1, y);
@@ -133,5 +133,5 @@ void end_game(Landmap mines) {
   mvprintw(height, 0, "You lose!");
   getch();
   endwin();
-  exit(1);
+  exit(0);
 }
