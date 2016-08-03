@@ -6,9 +6,13 @@
 #define WIDTH_MAX 100
 #define HEIGHT_MAX 100
 
-void render(char land[WIDTH_MAX][HEIGHT_MAX], int curx, int cury);
-void flood(char land[WIDTH_MAX][HEIGHT_MAX], char map[WIDTH_MAX][HEIGHT_MAX], int x, int y);
-void end_game(char mines[WIDTH_MAX][HEIGHT_MAX]);
+typedef struct {
+  char[WIDTH_MAX][HEIGHT_MAX] cells;
+} Landmap;
+
+void render(Landmap land, int curx, int cury);
+void flood(Landmap land, Landmap map, int x, int y);
+void end_game(Landmap mines);
 
 int width = 10, height = 10, num_mine = 10;
 
@@ -16,14 +20,14 @@ FILE *fdb;
 
 int main() {
   fdb = fopen("debug", "w");
-  char land[WIDTH_MAX][HEIGHT_MAX], map[WIDTH_MAX][HEIGHT_MAX], mines[WIDTH_MAX][HEIGHT_MAX];
+  Landmap land, map, mines;
   memset(land, '#', sizeof land);
   memset(mines, 0, sizeof mines);
   sranddev();
 
-  int i;
+  int i, x, y;
   for (i = 0; i < num_mine; ++i) {
-    int x = rand() % 10, y = rand() % 10;
+    x = rand() % width, y = rand() % height;
     if (mines[x][y])
       --i;
     else
