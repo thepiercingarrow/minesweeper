@@ -5,6 +5,8 @@
 
 #include <ncurses.h>
 
+#define IN_BOUNDS(x, y) ((0 <= x && x < width) && (0 <= y && y < height))
+
 #define WIDTH_MAX 100
 #define HEIGHT_MAX 100
 
@@ -27,13 +29,16 @@ int main() {
   memset(mines.cells, 0, sizeof(Landmap));
   srand(time());
 
-  int i, x, y;
+  int i, j, x, y;
   for (i = 0; i < num_mine; ++i) {
     x = rand() % width, y = rand() % height;
     if (mines.cells[x][y])
       --i;
-    else
+    else {
       mines.cells[x][y] = 1;
+      if (IN_BOUNDS)
+        ++map.cells[i][j];
+    }
   }
 
   int j;
@@ -42,7 +47,7 @@ int main() {
       int k, l, tot = 0;
       for (k = -1; k <= 1; ++k)
 	for (l = -1; l <= 1; ++l)
-	  tot += (0 <= (i+k) && (i+k) < width) && (0 <= (j+l) && (j+l) < height) ? mines.cells[i+k][j+l] : 0;
+	  tot +=  ? mines.cells[i+k][j+l] : 0;
       map.cells[i][j] = tot ? tot + '0' : ' ';
     }
   }
