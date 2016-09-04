@@ -25,7 +25,7 @@ int main() {
   fdb = fopen("debug", "w");
   memset(land.cells, '#', WIDTH_MAX * HEIGHT_MAX * sizeof(char));
   memset(mines.cells, 0, sizeof(Landmap));
-  sranddev();
+  srand(time());
 
   int i, x, y;
   for (i = 0; i < num_mine; ++i) {
