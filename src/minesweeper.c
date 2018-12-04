@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include <ncurses.h>
 
@@ -16,38 +16,41 @@ typedef struct {
 
 void render(int curx, int cury);
 void flood(int x, int y);
-void end_game();
+void lose();
+void win();
 
 int width = 10, height = 10, num_mine = 10;
 Landmap land, map, mines;
-
+int uncovered = 0;
 FILE *fdb;
 
 int main() {
   fdb = fopen("debug", "w");
   memset(land.cells, '#', WIDTH_MAX * HEIGHT_MAX * sizeof(char));
   memset(mines.cells, 0, sizeof(Landmap));
-  srand(time());
+  srand(time(NULL));
 
-  int i, j, x, y;
+  int i, x, y;
   for (i = 0; i < num_mine; ++i) {
     x = rand() % width, y = rand() % height;
     if (mines.cells[x][y])
       --i;
-    else {
+    else
       mines.cells[x][y] = 1;
-      if (IN_BOUNDS)
-        ++map.cells[i][j];
-    }
   }
 
+  // this can be written much betterly :P
   int j;
   for (i = 0; i < width; ++i) {
     for (j = 0; j < height; ++j) {
+      if (mines.cells[i][j]) {
+	map.cells[i][j] = '#';
+	continue;
+      }
       int k, l, tot = 0;
       for (k = -1; k <= 1; ++k)
 	for (l = -1; l <= 1; ++l)
-	  tot +=  ? mines.cells[i+k][j+l] : 0;
+	  tot += IN_BOUNDS(i + k, j + l) ? mines.cells[i+k][j+l] : 0;
       map.cells[i][j] = tot ? tot + '0' : ' ';
     }
   }
@@ -55,6 +58,7 @@ int main() {
   initscr();
   raw();
   noecho();
+  keypad(stdscr, 1);
   start_color();
 
   init_pair(1, COLOR_BLUE, COLOR_BLACK);
@@ -65,25 +69,25 @@ int main() {
   for (;;) {
     render(curx, cury);
     switch (getch()) {
-    case 'k':
+    case 'k': case KEY_UP:
       if (cury > 0)
 	--cury;
       break;
-    case 'j':
+    case 'j': case KEY_DOWN:
       if (cury < height - 1)
 	++cury;
       break;
-    case 'h':
+    case 'h': case KEY_LEFT:
       if (curx > 0)
 	--curx;
       break;
-    case 'l':
+    case 'l': case KEY_RIGHT:
       if (curx < width - 1)
 	++curx;
       break;
-    case 'u':
+    case 'u': case ' ':
       if (mines.cells[curx][cury])
-	end_game(mines);
+	lose(mines);
       if (land.cells[curx][cury] == '#')
 	flood(curx, cury);
       break;
@@ -120,6 +124,9 @@ void flood(int x, int y) {
     return;
   fprintf(fdb, "%d %d\n", x, y);
   land.cells[x][y] = map.cells[x][y];
+  ++uncovered;
+  if (uncovered == width * height - num_mine)
+    win();
   if (land.cells[x][y] == ' ') {
     flood(x + 1, y);
     flood(x, y + 1);
@@ -128,7 +135,7 @@ void flood(int x, int y) {
   }
 }
 
-void end_game() {
+void lose() {
   int i, j;
   attron(COLOR_PAIR(3));
   for (i = 0; i < width; ++i)
@@ -137,6 +144,20 @@ void end_game() {
 	mvaddch(j, 2 * i, ' ');
   attroff(COLOR_PAIR(3));
   mvprintw(height, 0, "You lose!");
+  getch();
+  endwin();
+  exit(0);
+}
+
+void win() {
+  int i, j;
+  attron(COLOR_PAIR(3));
+  for (i = 0; i < width; ++i)
+    for (j = 0; j < height; ++j)
+      if (mines.cells[i][j])
+	mvaddch(j, 2 * i, ' ');
+  attroff(COLOR_PAIR(3));
+  mvprintw(height, 0, "You win!");
   getch();
   endwin();
   exit(0);
